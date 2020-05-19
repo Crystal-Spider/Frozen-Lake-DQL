@@ -19,6 +19,9 @@ class Brain
   private float centerOutput;
   private float distanceOutput;
   
+  color lowColor;
+  color highColor;
+  
   public Brain(int inputNeuronsNumber, int hiddenNeuronsNumber, int outputNeuronsNumber, double learningRate)
   {
     this.learningRate = learningRate;
@@ -29,10 +32,10 @@ class Brain
     weightsOutputNeurons = new Layer(hiddenNeuronsNumber, outputNeuronsNumber);
     biasesOutputNeurons = new Layer(1, outputNeuronsNumber);
     
-    weightsHiddenNeurons.randomize();
+    /*weightsHiddenNeurons.randomize();
     biasesHiddenNeurons.randomize();
     weightsOutputNeurons.randomize();
-    biasesOutputNeurons.randomize();
+    biasesOutputNeurons.randomize();*/
     
     setDrawingVariables();
   }
@@ -142,39 +145,47 @@ class Brain
     */
     
     /*
-      dLS/dBO equals the Loss Derivative (in this case), so the variable for its value
-      is not instantiated and instead the variable lossDerivative is used.
+      The Loss Derivative equals dLS/dBO (in this case), so the variable for its value
+      is not instantiated and instead the variable dBiasO is used.
       
-      Multiplications between derivatives with the chain rule are all dot products.
+      The only difference between dLS/dWH (dWeightH) and dLS/dBH (dBiasH) is that the
+      latter is not multiplied with IN (InputNeurons). So, to save computational time,
+      dWeightH just equals dBiasH multiplied with InputNeurons.
+      
+      Multiplications within the chain rule are all dot products when matrices sizes
+      are different.
       
       In certain cases in the code the transpose function is used on some Layers
       to make the dot product with another Layer possible. Note that transposing
       a matrix doesn't change its values but only swaps rows and columns.
     */
     
-    Layer lossDerivative = (outputNeurons.subtraction(desiredOutput)).valueMultiplication(2);
+    Layer dBiasO = (outputNeurons.subtraction(desiredOutput)).valueMultiplication(2);
+    Layer dBiasH = (dBiasO.dotProduct(weightsOutputNeurons.transpose())).layerMultiplication((inputNeurons.dotProduct(weightsHiddenNeurons).addition(biasesHiddenNeurons)).sigmoidDerivative());
     
-    Layer dWeightO = (hiddenNeurons.transpose()).dotProduct(lossDerivative);
-    Layer dWeightH = (inputNeurons.transpose()).dotProduct((lossDerivative.dotProduct(weightsOutputNeurons.transpose())).layerMultiplication(((inputNeurons.dotProduct(weightsHiddenNeurons).addition(biasesHiddenNeurons)).sigmoidDerivative())));
-    Layer dBiasH = (lossDerivative.dotProduct(weightsOutputNeurons.transpose())).layerMultiplication(((inputNeurons.dotProduct(weightsHiddenNeurons).addition(biasesHiddenNeurons)).sigmoidDerivative()));
+    Layer dWeightO = (hiddenNeurons.transpose()).dotProduct(dBiasO);
+    Layer dWeightH = (inputNeurons.transpose()).dotProduct(dBiasH);
     
     //Set new values for Weights and Biases
     weightsHiddenNeurons = weightsHiddenNeurons.subtraction(dWeightH.valueMultiplication(learningRate));
     biasesHiddenNeurons = biasesHiddenNeurons.subtraction(dBiasH.valueMultiplication(learningRate));
     weightsOutputNeurons = weightsOutputNeurons.subtraction(dWeightO.valueMultiplication(learningRate));
-    biasesOutputNeurons = biasesOutputNeurons.subtraction(lossDerivative.valueMultiplication(learningRate));
+    biasesOutputNeurons = biasesOutputNeurons.subtraction(dBiasO.valueMultiplication(learningRate));
   }
   
   public void setDrawingVariables()
   {
     this.centerInput = size + nnSpace/5;
-    this.distanceInput = size/(cellNum*2);
+    this.distanceInput = size/(cellNum*2); //Used also as Neurons size.
     
     this.centerHidden = size + nnSpace/2;
     this.distanceHidden = size/cellNum; //(cellNum/2*2)
     
     this.centerOutput = size + nnSpace*4/5;
     this.distanceOutput = size/8; //4*2
+    
+    lowColor = color(0, 0, 100);
+    highColor = color(0, 127, 255);
   }
   
   //Method to draw the Neural Network (Only works well when cellNum <= 8)
@@ -184,62 +195,70 @@ class Brain
     Circles' margins are the neurons' biases. They range from blue to light blue depending on their value.
   */
   //Biases for Input Neurons never change and are always set to white.
+  //With certain values the Input Neurons and the Hidden Neurons are not vertically centered.
   public void render(Layer InputNeurons, Layer HiddenNeurons, Layer OutputNeurons)
   {
     fill(0);
     noStroke();
     rect(size, 0, nnSpace, size);
-    strokeWeight(1);
     
     Layer norm; //Layer used to normalize data.
     
     norm = weightsHiddenNeurons.sigmoid();
     //Draw Hidden Neurons Weights
+    strokeWeight(1);
     for(int h = 0; h < norm.hei; h++)
     {
       for(int w = 0; w < norm.wid; w++)
       {
-        stroke(255, map((float)norm.layer[h][w], 0, 1, 0, 255), 0);
+        stroke(gradient(lowColor, highColor, norm.layer[h][w]));
         line(centerInput, distanceInput*h*2 + distanceInput, centerHidden, distanceHidden*w*2 + distanceHidden);
       }
     }
     
     //Draw Input Neurons.
+    strokeWeight(2);
     for(int w = 0; w < InputNeurons.wid; w++)
     {
-      stroke(255);
-      fill(map((float)InputNeurons.layer[0][w], 0, 1, 0, 255));
+      stroke(highColor);
+      fill(gradient(0, 255, InputNeurons.layer[0][w]));
       ellipse(centerInput, distanceInput*w*2 + distanceInput, distanceInput, distanceInput);
     }
     
     norm = weightsOutputNeurons.sigmoid();
     //Draw Output Neurons Weights
+    strokeWeight(1);
     for(int h = 0; h < norm.hei; h++)
     {
       for(int w = 0; w < norm.wid; w++)
       {
-        stroke(255, map((float)norm.layer[h][w], 0, 1, 0, 255), 0);
+        stroke(gradient(lowColor, highColor, norm.layer[h][w]));
         line(centerHidden, distanceHidden*h*2 + distanceHidden, centerOutput, distanceOutput*w*2 + distanceOutput);
       }
     }
     
     norm = biasesHiddenNeurons.sigmoid();
     //Draw Hidden Neurons.
+    strokeWeight(3);
     for(int w = 0; w < HiddenNeurons.wid; w++)
     {
-      stroke(0, map((float)norm.layer[0][w], 0, 1, 0, 255), 255);
-      fill(map((float)HiddenNeurons.layer[0][w], 0, 1, 0, 255));
+      stroke(gradient(lowColor, highColor, norm.layer[0][w]));
+      fill(gradient(0, 255, HiddenNeurons.layer[0][w]));
       ellipse(centerHidden, distanceHidden*w*2 + distanceHidden, distanceInput, distanceInput);
     }
     
     norm = biasesOutputNeurons.sigmoid();
-    println(OutputNeurons.toString());
     //Draw OutputNeurons;
     for(int w = 0; w < OutputNeurons.wid; w++)
     {
-      stroke(0, map((float)norm.layer[0][w], 0, 1, 0, 255), 255);
-      fill(map((float)OutputNeurons.layer[0][w], 0, 1, 0, 255));
+      stroke(gradient(lowColor, highColor, norm.layer[0][w]));
+      fill(gradient(0, 255, OutputNeurons.layer[0][w]));
       ellipse(centerOutput, distanceOutput*w*2 + distanceOutput, distanceInput, distanceInput);
     }
+  }
+  
+  private color gradient(color c1, color c2, double value)
+  {
+    return lerpColor(c1, c2, (float)value);
   }
 }

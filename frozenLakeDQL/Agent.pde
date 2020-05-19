@@ -128,7 +128,7 @@ class Agent
     if(outOfMap)
     {
       noStroke();
-      fill(150, 150, 150);
+      fill(150);
       ellipse(x, y, dim, dim);
     }
   }

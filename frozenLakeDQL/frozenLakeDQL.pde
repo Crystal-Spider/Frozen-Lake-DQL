@@ -1,5 +1,5 @@
 int size = 900; //Canvas size (pixels).
-int nnSpace = size*2/3; //Space to draw the Agent's Neural Network.
+int nnSpace = size; //Space to draw the Agent's Neural Network.
 int sideLength = 4; //Cells number per row/column (To make the game work, this value must be >= 2).
 int cellNum = sideLength*sideLength; //Total cells number.
 int cellDim = size/sideLength; //Single cell dimension.
@@ -8,24 +8,14 @@ float div = 10; //To slow down Agent while playing.
 
 //cellNum - gamesThreshold (experimental values)
 /*
-        2 - ?
-        3 - ?
-        4 - 5000
-        5 - ?
-        6 - ?
-        7 - ?
-        8 - ?
-        9 - ?
-       10 - ?
-       11 - ?
-       12 - ?
-       13 - ?
-       14 - ?
-       15 - ?
-       16 - ?
+        3 - 3000
+        4 - 4000
+        5 - 5000
+        6 - 6000
+        7 - 7000
 */
 
-GameData gameData = new GameData(5000); //Game infos.
+GameData gameData = new GameData(sideLength*1000); //Game infos.
 Lake lake = new Lake(); //Environment.
 Agent agent = new Agent(cellDim/2); //Agent.
 
