@@ -176,10 +176,10 @@ class Brain
   public void setDrawingVariables()
   {
     this.centerInput = size + nnSpace/5;
-    this.distanceInput = size/(cellNum*2); //Used also as Neurons size.
+    this.distanceInput = size/(cellNum*2);
     
     this.centerHidden = size + nnSpace/2;
-    this.distanceHidden = size/cellNum; //(cellNum/2*2)
+    this.distanceHidden = size/(biasesHiddenNeurons.wid*2); //(cellNum/2*2)
     
     this.centerOutput = size + nnSpace*4/5;
     this.distanceOutput = size/8; //4*2
@@ -190,11 +190,11 @@ class Brain
   
   //Method to draw the Neural Network (Only works well when cellNum <= 8)
   /*
-    Lines are the weights. They range from red to yellow, depending on their value.
-    Circles are the neurons. They range from black to white depending on their value.
-    Circles' margins are the neurons' biases. They range from blue to light blue depending on their value.
+    Lines are the weights.
+    Circles are the neurons.
+    Circles' margins are the neurons' biases.
   */
-  //Biases for Input Neurons never change and are always set to white.
+  //Biases for Input Neurons never change and are always set to highColor.
   //With certain values the Input Neurons and the Hidden Neurons are not vertically centered.
   public void render(Layer InputNeurons, Layer HiddenNeurons, Layer OutputNeurons)
   {
