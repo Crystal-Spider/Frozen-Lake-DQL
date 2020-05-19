@@ -32,10 +32,10 @@ class Brain
     weightsOutputNeurons = new Layer(hiddenNeuronsNumber, outputNeuronsNumber);
     biasesOutputNeurons = new Layer(1, outputNeuronsNumber);
     
-    /*weightsHiddenNeurons.randomize();
+    weightsHiddenNeurons.randomize();
     biasesHiddenNeurons.randomize();
     weightsOutputNeurons.randomize();
-    biasesOutputNeurons.randomize();*/
+    biasesOutputNeurons.randomize();
     
     setDrawingVariables();
   }
