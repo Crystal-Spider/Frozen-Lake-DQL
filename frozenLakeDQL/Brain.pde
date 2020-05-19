@@ -163,14 +163,6 @@ class Brain
     biasesHiddenNeurons = biasesHiddenNeurons.subtraction(dBiasH.valueMultiplication(learningRate));
     weightsOutputNeurons = weightsOutputNeurons.subtraction(dWeightO.valueMultiplication(learningRate));
     biasesOutputNeurons = biasesOutputNeurons.subtraction(lossDerivative.valueMultiplication(learningRate));
-    
-    /*
-    println(weightsHiddenNeurons.toString());
-    println(biasesHiddenNeurons.toString());
-    println(weightsOutputNeurons.toString());
-    println(biasesOutputNeurons.toString());
-    */
-    
   }
   
   public void setDrawingVariables()
