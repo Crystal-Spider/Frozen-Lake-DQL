@@ -239,7 +239,7 @@ class Brain
     
     norm = biasesHiddenNeurons.sigmoid();
     //Draw Hidden Neurons.
-    strokeWeight(3);
+    strokeWeight(2);
     for(int w = 0; w < HiddenNeurons.wid; w++)
     {
       stroke(gradient(lowColor, highColor, norm.layer[0][w]));
